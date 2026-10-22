@@ -1,16 +1,24 @@
-cat > .gitignore <<'EOF'
 # Terraform working directories
 **/.terraform/*
 
-# Terraform state files
+# Terraform state (should only ever live in the GCS backend)
 *.tfstate
 *.tfstate.*
-*.tfstate.backup
 
-# Variable files that may contain secrets
-*.tfvars
-*.tfvars.json
-!*.example.tfvars
+# Saved plans (can contain sensitive values)
+*.tfplan
+tfplan
+
+# Local override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Variable files: commit terraform.tfvars (non-secret config only).
+# Anything named secrets.* stays local.
+secrets.auto.tfvars
+secrets.auto.tfvars.json
 
 # Crash logs
 crash.log
@@ -19,7 +27,13 @@ crash.*.log
 # Environment files
 .env
 .env.*
+!.env.example
 
-# macOS files
+# Credentials, in case a key ever lands in the repo by accident
+*.pem
+*.p12
+*-key.json
+credentials*.json
+
+# macOS
 .DS_Store
-EOF
