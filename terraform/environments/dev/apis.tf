@@ -2,15 +2,6 @@ locals {
   apis = [
     "compute.googleapis.com",
     "container.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "secretmanager.googleapis.com",
-    "iam.googleapis.com",
-    "iamcredentials.googleapis.com",
-    "sts.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "monitoring.googleapis.com",
-    "logging.googleapis.com",
   ]
 }
 
