@@ -1,0 +1,91 @@
+name: deploy-api
+
+on:
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "deploy/**"
+      - ".github/workflows/deploy-api.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - "deploy/**"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC to GCP
+
+concurrency:
+  group: deploy-api-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGION: europe-west2
+  ZONE: europe-west2-a
+  CLUSTER: sneak-dev
+  IMAGE: europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/sneak/api
+
+jobs:
+  # On pull requests: prove the image builds. No cloud access, no push.
+  build:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image (no push)
+        run: docker build -t api:pr apps/api
+
+      - name: Validate manifests
+        run: kubectl kustomize deploy/overlays/dev > /dev/null
+
+  # On merge to main: build, push, deploy, verify, roll back on failure.
+  deploy:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: gke-gcloud-auth-plugin
+
+      - name: Build and push image
+        run: |
+          gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+          docker build -t ${IMAGE}:${GITHUB_SHA} apps/api
+          docker push ${IMAGE}:${GITHUB_SHA}
+
+      - uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.CLUSTER }}
+          location: ${{ env.ZONE }}
+
+      - name: Deploy
+        run: |
+          cd deploy/overlays/dev
+          kustomize edit set image ${IMAGE}=${IMAGE}:${GITHUB_SHA}
+          kubectl apply -k .
+
+      - name: Wait for rollout
+        id: rollout
+        run: kubectl rollout status deployment/api -n api --timeout=180s
+
+      - name: Show what is running
+        if: always()
+        run: |
+          kubectl get pods -n api -o wide
+          kubectl get deployment api -n api -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+      - name: Roll back on failure
+        if: failure() && steps.rollout.outcome == 'failure'
+        run: kubectl rollout undo deployment/api -n api
