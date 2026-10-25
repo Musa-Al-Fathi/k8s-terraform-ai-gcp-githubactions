@@ -13,3 +13,28 @@ variable "zone" {
 variable "environment" {
   type = string
 }
+
+variable "registry_repository_id" {
+  type        = string
+  description = "Artifact Registry repo created in terraform/shared"
+}
+
+variable "release_channel" {
+  type = string
+}
+
+variable "deletion_protection" {
+  type = bool
+}
+
+variable "spot" {
+  type = bool
+}
+
+variable "min_nodes" {
+  type = number
+}
+
+variable "max_nodes" {
+  type = number
+}
