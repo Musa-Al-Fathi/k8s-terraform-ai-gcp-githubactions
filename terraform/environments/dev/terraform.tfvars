@@ -3,9 +3,9 @@ region                 = "europe-west2"
 zone                   = "europe-west2-a"
 environment            = "dev"
 registry_repository_id = "sneak"
-network_name            = "sneak-vpc"
-subnetwork_name         = "sneak-dev-subnet"
-master_ipv4_cidr_block  = "10.40.0.0/28"
+network_name           = "sneak-vpc"
+subnetwork_name        = "sneak-dev-subnet"
+master_ipv4_cidr_block = "10.40.0.0/28"
 
 release_channel     = "REGULAR"
 deletion_protection = false
