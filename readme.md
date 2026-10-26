@@ -74,7 +74,7 @@ Configure a protected GitHub Environment named `production` with required review
 
 ## Network and workload caveats
 
-GKE nodes have private IPs, while the control-plane endpoint is public so a hosted GitHub runner can reach it. Authentication is still required, but before production use restrict control-plane access or use a private endpoint with a runner that has private network connectivity. Private nodes do not have general internet egress in this design; add and configure Cloud NAT if workloads need to reach public internet services.
+GKE nodes have private IPs, and the public control-plane endpoint is restricted by master-authorized networks. The example `192.0.2.0/24` entry in both environment `terraform.tfvars` files is a documentation-only placeholder from a reserved example range: **replace it with trusted, real egress CIDRs before applying**. A GitHub-hosted runner's egress IP is not stable for a simple allowlist; use a self-hosted runner with fixed egress or another private connectivity design for deployment. Do not replace the placeholder with `0.0.0.0/0`. Private nodes do not have general internet egress in this design; add and configure Cloud NAT if workloads need to reach public internet services.
 
 Development is configured for lower-cost Spot nodes and a regular release channel. Production uses non-Spot nodes, deletion protection and the regular release channel. These are lab defaults, not a claim that the cluster is fully production-hardened.
 
