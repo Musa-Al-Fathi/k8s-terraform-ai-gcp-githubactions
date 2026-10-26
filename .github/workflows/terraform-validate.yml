@@ -1,5 +1,5 @@
 name: Terraform validation
-# Validate Terraform roots, scan IaC configuration, and enforce control-plane allowlists.
+# Validate Terraform roots, scan IaC configuration, and enforce control-plane allowlists. # CI rerun.
 
 on:
   pull_request:
