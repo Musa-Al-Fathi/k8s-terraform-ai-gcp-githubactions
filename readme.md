@@ -60,7 +60,7 @@ Review every plan before applying. Production resources have deletion protection
 
 ## GitHub Actions configuration
 
-The shared root configures Workload Identity Federation and a dedicated deployer service account. The trust condition is scoped to the configured repository. The deployment workflow expects these **GitHub repository or production-environment variables**:
+The shared root configures Workload Identity Federation and a dedicated deployer service account. The trust condition is scoped to the configured repository. Add these **repository-level Actions variables** (Settings → Secrets and variables → Actions → Variables), because the build job also needs them:
 
 - `GCP_WORKLOAD_IDENTITY_PROVIDER`: the full `wif_provider` output from the shared root.
 - `GCP_SERVICE_ACCOUNT`: the `deployer_sa` output.
