@@ -8,7 +8,7 @@ subnetwork_name               = "sneak-prod-subnet"
 master_ipv4_cidr_block        = "10.40.0.16/28"
 master_authorized_cidr_blocks = [
   {
-    cidr_block   = "192.0.2.0/24"
+    cidr_block  = "192.0.2.0/24"
     display_name = "REPLACE_WITH_TRUSTED_RUNNER_OR_ADMIN_EGRESS"
   }
 ]
