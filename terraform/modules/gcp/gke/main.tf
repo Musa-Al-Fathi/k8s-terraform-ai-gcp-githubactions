@@ -42,16 +42,12 @@ resource "google_container_cluster" "main" {
     services_secondary_range_name = "services"
   }
 
-  # This lab uses the public control-plane endpoint. Restrict access before
-  # production use; a private endpoint requires deliberate operator connectivity.
+  # Nodes have private addresses. The public control-plane endpoint remains
+  # reachable by the hosted GitHub runner; restrict it before production use.
   private_cluster_config {
     enable_private_nodes    = true
     enable_private_endpoint = false
     master_ipv4_cidr_block  = var.master_ipv4_cidr_block
-  }
-
-  master_authorized_networks_config {
-    gcp_public_cidrs_access_enabled = true
   }
 }
 
