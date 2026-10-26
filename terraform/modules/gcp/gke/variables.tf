@@ -10,6 +10,29 @@ variable "zone" {
   type = string
 }
 
+variable "network_name" {
+  type        = string
+  description = "Name of the shared VPC managed by the shared root."
+}
+
+variable "subnetwork_name" {
+  type        = string
+  description = "Environment-specific subnet with pods/services secondary ranges."
+}
+
+variable "master_ipv4_cidr_block" {
+  type        = string
+  description = "Dedicated /28 CIDR for the GKE control plane."
+}
+
+variable "master_authorized_cidr_blocks" {
+  type = list(object({
+    cidr_block   = string
+    display_name = string
+  }))
+  description = "Trusted public egress CIDRs allowed to reach the GKE control plane."
+}
+
 variable "release_channel" {
   type    = string
   default = "REGULAR"

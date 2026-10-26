@@ -22,8 +22,8 @@ resource "google_container_cluster" "main" {
   name     = "sneak-${var.environment}"
   location = var.zone
 
-  network    = "default"
-  subnetwork = "default"
+  network    = var.network_name
+  subnetwork = var.subnetwork_name
 
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -37,7 +37,30 @@ resource "google_container_cluster" "main" {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
 
-  ip_allocation_policy {}
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
+
+  # Nodes have private addresses. Restrict public control-plane access to
+  # explicitly configured trusted admin/runner egress CIDRs.
+  master_authorized_networks_config {
+    gcp_public_cidrs_access_enabled = false
+
+    dynamic "cidr_blocks" {
+      for_each = var.master_authorized_cidr_blocks
+      content {
+        cidr_block   = cidr_blocks.value.cidr_block
+        display_name = cidr_blocks.value.display_name
+      }
+    }
+  }
+
+  private_cluster_config {
+    enable_private_nodes    = true
+    enable_private_endpoint = false
+    master_ipv4_cidr_block  = var.master_ipv4_cidr_block
+  }
 }
 
 resource "google_container_node_pool" "main" {
