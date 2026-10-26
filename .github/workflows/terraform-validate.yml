@@ -1,4 +1,5 @@
 name: Terraform validation
+# Validate Terraform roots and scan IaC configuration.
 
 on:
   pull_request:
