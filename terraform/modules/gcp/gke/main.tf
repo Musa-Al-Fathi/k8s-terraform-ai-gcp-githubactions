@@ -42,8 +42,20 @@ resource "google_container_cluster" "main" {
     services_secondary_range_name = "services"
   }
 
-  # Nodes have private addresses. The public control-plane endpoint remains
-  # reachable by the hosted GitHub runner; restrict it before production use.
+  # Nodes have private addresses. Restrict public control-plane access to
+  # explicitly configured trusted admin/runner egress CIDRs.
+  master_authorized_networks_config {
+    gcp_public_cidrs_access_enabled = false
+
+    dynamic "cidr_blocks" {
+      for_each = var.master_authorized_cidr_blocks
+      content {
+        cidr_block   = cidr_blocks.value.cidr_block
+        display_name = cidr_blocks.value.display_name
+      }
+    }
+  }
+
   private_cluster_config {
     enable_private_nodes    = true
     enable_private_endpoint = false
