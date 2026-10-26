@@ -31,6 +31,13 @@ variable "master_ipv4_cidr_block" {
   type = string
 }
 
+variable "master_authorized_cidr_blocks" {
+  type = list(object({
+    cidr_block   = string
+    display_name = string
+  }))
+}
+
 variable "release_channel" {
   type = string
 }
