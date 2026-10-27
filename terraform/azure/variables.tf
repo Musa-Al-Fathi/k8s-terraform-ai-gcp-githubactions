@@ -34,6 +34,10 @@ variable "aks_max_node_count" {
   type    = number
   default = 3
 }
+variable "aks_api_server_authorized_ip_ranges" {
+  type        = list(string)
+  description = "Trusted public egress CIDRs allowed to access the AKS API server."
+}
 variable "tags" {
   type    = map(string)
   default = {}
