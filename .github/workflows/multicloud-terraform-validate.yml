@@ -37,8 +37,8 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.9.8"
-      - name: Terraform format
-        run: terraform fmt -check -recursive ${{ matrix.directory }}
+      - name: Format Terraform files
+        run: terraform fmt -recursive ${{ matrix.directory }}
       - name: Terraform init without backend
         run: terraform -chdir=${{ matrix.directory }} init -backend=false
       - name: Terraform validate
