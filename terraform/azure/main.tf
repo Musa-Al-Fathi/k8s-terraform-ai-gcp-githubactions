@@ -40,11 +40,11 @@ resource "azurerm_container_registry" "platform" {
 }
 
 resource "azurerm_kubernetes_cluster" "platform" {
-  name                    = "${local.name}-aks"
-  location                = azurerm_resource_group.platform.location
-  resource_group_name     = azurerm_resource_group.platform.name
-  dns_prefix              = "${local.name}-aks"
-  sku_tier                = "Free"
+  name                   = "${local.name}-aks"
+  location               = azurerm_resource_group.platform.location
+  resource_group_name    = azurerm_resource_group.platform.name
+  dns_prefix             = "${local.name}-aks"
+  sku_tier               = "Free"
   local_account_disabled = true
 
   api_server_access_profile {
