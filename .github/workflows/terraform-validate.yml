@@ -36,7 +36,7 @@ jobs:
         with:
           terraform_version: "1.10.5"
       - name: Format Terraform files before validation
-        run: terraform fmt -recursive terraform
+        run: terraform fmt -check -diff -recursive terraform
       - name: Initialize root (backend disabled)
         working-directory: ${{ matrix.root }}
         run: terraform init -backend=false -input=false
