@@ -8,11 +8,13 @@ locals {
     project     = "kubernetes-platform"
   }, var.tags)
 }
+
 resource "azurerm_resource_group" "platform" {
   name     = "${local.name}-rg"
   location = var.location
   tags     = local.tags
 }
+
 resource "azurerm_virtual_network" "platform" {
   name                = "${local.name}-vnet"
   location            = azurerm_resource_group.platform.location
@@ -20,12 +22,14 @@ resource "azurerm_virtual_network" "platform" {
   address_space       = ["10.20.0.0/16"]
   tags                = local.tags
 }
+
 resource "azurerm_subnet" "aks" {
   name                 = "${local.name}-aks-subnet"
   resource_group_name  = azurerm_resource_group.platform.name
   virtual_network_name = azurerm_virtual_network.platform.name
   address_prefixes     = ["10.20.0.0/20"]
 }
+
 resource "azurerm_container_registry" "platform" {
   name                = replace("${var.name_prefix}${var.environment}${substr(sha1(var.subscription_id), 0, 6)}", "-", "")
   resource_group_name = azurerm_resource_group.platform.name
@@ -34,12 +38,13 @@ resource "azurerm_container_registry" "platform" {
   admin_enabled       = false
   tags                = local.tags
 }
+
 resource "azurerm_kubernetes_cluster" "platform" {
-  name                = "${local.name}-aks"
-  location            = azurerm_resource_group.platform.location
-  resource_group_name = azurerm_resource_group.platform.name
-  dns_prefix          = "${local.name}-aks"
-  sku_tier             = "Free"
+  name                    = "${local.name}-aks"
+  location                = azurerm_resource_group.platform.location
+  resource_group_name     = azurerm_resource_group.platform.name
+  dns_prefix              = "${local.name}-aks"
+  sku_tier                = "Free"
   local_account_disabled = true
 
   api_server_access_profile {
@@ -56,13 +61,16 @@ resource "azurerm_kubernetes_cluster" "platform" {
     os_disk_size_gb      = 64
     type                 = "VirtualMachineScaleSets"
   }
+
   identity {
     type = "SystemAssigned"
   }
+
   azure_active_directory_role_based_access_control {
-    tenant_id        = data.azurerm_client_config.current.tenant_id
+    tenant_id          = data.azurerm_client_config.current.tenant_id
     azure_rbac_enabled = true
   }
+
   network_profile {
     network_plugin    = "azure"
     network_policy    = "azure"
@@ -70,8 +78,10 @@ resource "azurerm_kubernetes_cluster" "platform" {
     service_cidr      = "10.21.0.0/16"
     dns_service_ip    = "10.21.0.10"
   }
+
   tags = local.tags
 }
+
 resource "azurerm_role_assignment" "aks_pull_acr" {
   scope                = azurerm_container_registry.platform.id
   role_definition_name = "AcrPull"
