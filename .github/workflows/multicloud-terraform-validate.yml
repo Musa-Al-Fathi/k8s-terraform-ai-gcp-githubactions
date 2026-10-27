@@ -1,0 +1,45 @@
+name: Multi-cloud Terraform validation
+
+on:
+  pull_request:
+    paths:
+      - "terraform/azure/**"
+      - "terraform/aws/**"
+      - "terraform/gcp/**"
+      - ".github/workflows/multicloud-terraform-validate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "terraform/azure/**"
+      - "terraform/aws/**"
+      - "terraform/gcp/**"
+      - ".github/workflows/multicloud-terraform-validate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate ${{ matrix.provider }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - provider: azure
+            directory: terraform/azure
+          - provider: aws
+            directory: terraform/aws
+          - provider: gcp
+            directory: terraform/gcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - name: Terraform format
+        run: terraform fmt -check -recursive ${{ matrix.directory }}
+      - name: Terraform init without backend
+        run: terraform -chdir=${{ matrix.directory }} init -backend=false
+      - name: Terraform validate
+        run: terraform -chdir=${{ matrix.directory }} validate
