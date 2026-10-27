@@ -1,0 +1,8 @@
+subscription_id    = "00000000-0000-0000-0000-000000000000"
+location           = "uksouth"
+name_prefix        = "sneak"
+environment        = "dev"
+aks_node_vm_size   = "Standard_D2s_v5"
+aks_min_node_count = 1
+aks_max_node_count = 3
+# Copy to terraform.tfvars and replace subscription_id.
