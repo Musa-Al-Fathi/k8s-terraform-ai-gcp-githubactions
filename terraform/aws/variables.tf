@@ -18,10 +18,6 @@ variable "environment" {
     error_message = "environment must be dev, test or prod."
   }
 }
-variable "cluster_endpoint_public_access_cidrs" {
-  type        = list(string)
-  description = "Trusted public IPv4 CIDRs allowed to reach EKS API. Replace the example CIDR before apply."
-}
 variable "eks_instance_types" {
   type    = list(string)
   default = ["t3.medium"]
