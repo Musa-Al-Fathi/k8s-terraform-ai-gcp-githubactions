@@ -1,9 +1,8 @@
 aws_region = "eu-west-2"
 name_prefix = "sneak"
 environment = "dev"
-# Documentation-only CIDR. Replace with your trusted public IP/32 before apply.
-cluster_endpoint_public_access_cidrs = ["203.0.113.10/32"]
 eks_instance_types = ["t3.medium"]
 eks_min_size = 1
 eks_desired_size = 1
 eks_max_size = 3
+# EKS API endpoint is private-only. Use a connected VPC/VPN or a runner inside the VPC for kubectl and deployments.
