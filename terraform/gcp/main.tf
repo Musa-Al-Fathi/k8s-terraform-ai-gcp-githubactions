@@ -118,6 +118,9 @@ resource "google_container_node_pool" "platform" {
     metadata = {
       disable-legacy-endpoints = "true"
     }
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
     shielded_instance_config {
       enable_secure_boot          = true
       enable_integrity_monitoring = true
