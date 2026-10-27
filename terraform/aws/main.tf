@@ -20,7 +20,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.platform.id
   availability_zone       = local.azs[count.index]
   cidr_block              = "10.30.${count.index + 1}.0/24"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   tags = {
     Name                                       = "${local.name}-public-${count.index + 1}"
     "kubernetes.io/role/elb"                   = "1"
@@ -85,14 +85,24 @@ resource "aws_ecr_repository" "platform" {
     encryption_type = "AES256"
   }
 }
+resource "aws_kms_key" "eks_secrets" {
+  description             = "EKS secret encryption key for ${local.name}"
+  enable_key_rotation     = true
+  deletion_window_in_days = 7
+  tags                    = { Name = "${local.name}-eks-secrets" }
+}
+resource "aws_kms_alias" "eks_secrets" {
+  name          = "alias/${local.name}-eks-secrets"
+  target_key_id = aws_kms_key.eks_secrets.key_id
+}
 resource "aws_iam_role" "eks_cluster" {
   name = "${local.name}-eks-cluster-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "eks.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -111,20 +121,25 @@ resource "aws_eks_cluster" "platform" {
   vpc_config {
     subnet_ids              = aws_subnet.private[*].id
     endpoint_private_access = true
-    endpoint_public_access  = true
-    public_access_cidrs     = var.cluster_endpoint_public_access_cidrs
+    endpoint_public_access  = false
   }
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
-  depends_on                = [aws_iam_role_policy_attachment.eks_cluster]
+  encryption_config {
+    provider {
+      key_arn = aws_kms_key.eks_secrets.arn
+    }
+    resources = ["secrets"]
+  }
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster]
 }
 resource "aws_iam_role" "eks_nodes" {
   name = "${local.name}-eks-node-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "ec2.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
